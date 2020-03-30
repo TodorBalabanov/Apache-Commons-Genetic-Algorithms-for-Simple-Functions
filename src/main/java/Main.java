@@ -46,6 +46,38 @@ class StyblinskiTangFunction implements Function {
 	}
 }
 
+class RastriginFunction implements Function {
+	@Override
+	public double value(List<Double> input) {
+		double output = 0;
+
+		for (Double value : input) {
+			output += value * value - 10 * Math.cos(2 * Math.PI * value);
+		}
+
+		output += 10 * input.size();
+
+		return output;
+	}
+}
+
+class RosenbrockFunction implements Function {
+	@Override
+	public double value(List<Double> input) {
+		double output = 0;
+
+		for (int i = 0; i < input.size() - 1; i++) {
+			double xi0 = input.get(i);
+			double xi1 = input.get(i + 1);
+
+			output += 100 * (xi1 - xi0 * xi0) * (xi1 - xi0 * xi0)
+					+ (1 - xi0) * (1 - xi0);
+		}
+
+		return output;
+	}
+}
+
 class DoubleListChromosome extends AbstractListChromosome<Double> {
 	private Function function = null;
 
@@ -160,7 +192,10 @@ public class Main {
 				new RandomDoubleMutation(), MUTATION_RATE,
 				new TournamentSelection(TOURNAMENT_AIRITY));
 
-		Function function = new SphereFunction();
+		/* Select function for optimization. */
+		Function function = new RosenbrockFunction();
+
+		/* Initialize random solutions. */
 		List<Chromosome> list = new ArrayList<Chromosome>();
 		for (int i = 0; i < POPULATION_SIZE; i++) {
 			Double values[] = new Double[CHROMOSOME_SIZE];
@@ -170,10 +205,12 @@ public class Main {
 			list.add(new DoubleListChromosome(values, function));
 		}
 
+		/* Crate initial population. */
 		Population initial, optimized;
 		initial = optimized = new ElitisticListPopulation(list, list.size(),
 				ELITISM_RATE);
 
+		/* Optimize population. */
 		for (int g = 0; g < TOTOAL_NUMBER_OF_OPTIMIZATIONS; g++) {
 			System.out.println(optimized.getFittestChromosome());
 
